@@ -20,9 +20,13 @@ ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.8.1",
+  "com.tumblr" %% "colossus" % "0.8.1",
+  "com.typesafe.akka" %% "akka-actor" % "2.4.11",
+
   "org.specs2" %% "specs2-core" % "3.8.5" % "test",
   "org.specs2" %% "specs2-mock" % "3.8.5" % "test",
-  "org.specs2" %% "specs2-junit" % "3.8.5" % "test"
+  "org.specs2" %% "specs2-junit" % "3.8.5" % "test",
+  "com.tumblr" %% "colossus-testkit" % "0.8.1" % "test"
 )
 
 fork in Test := false
