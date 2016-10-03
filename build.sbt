@@ -13,11 +13,16 @@ externalResolvers ++= Seq(
 
 resolvers += Resolver.url("Typesafe Ivy releases", url("https://repo.typesafe.com/typesafe/ivy-releases"))(Resolver.ivyStylePatterns)
 resolvers += "Maven central" at "http://repo1.maven.org/maven2/"
+resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 libraryDependencies ++= Seq(
-  "joda-time" % "joda-time" % "2.8.1"
+  "joda-time" % "joda-time" % "2.8.1",
+  "org.specs2" %% "specs2-core" % "3.8.5" % "test",
+  "org.specs2" %% "specs2-mock" % "3.8.5" % "test",
+  "org.specs2" %% "specs2-junit" % "3.8.5" % "test"
 )
 
 fork in Test := false
