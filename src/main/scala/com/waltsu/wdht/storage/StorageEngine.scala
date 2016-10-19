@@ -18,6 +18,6 @@ object StorageEngine {
   }
 
   def reset() = {
-    ???
+    database.run { StoredObjectTable.storedObjects.delete }
   }
 }
