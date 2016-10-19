@@ -15,9 +15,22 @@ class StorageEngineSpec(implicit ec: ExecutionContext) extends mutable.Specifica
       val tests = for {
         storedObject <- StorageEngine.put("foo", "bar")
       } yield {
-        storedObject.id should beGreaterThan(0)
+        storedObject.id.get should beGreaterThan(0)
         storedObject.key must equalTo("foo")
         storedObject.value must equalTo("bar")
+      }
+      Await.result(tests, 2 seconds)
+    }
+
+    "update old value" in new CleanDatabase {
+      val tests = for {
+        insertion <- StorageEngine.put("foo", "bar")
+        update <- StorageEngine.put("foo", "bazz")
+      } yield {
+        insertion.id.get should beGreaterThan(0)
+        insertion.id.get should equalTo(update.id.get)
+        update.key must equalTo("foo")
+        update.value must equalTo("bazz")
       }
       Await.result(tests, 2 seconds)
     }
