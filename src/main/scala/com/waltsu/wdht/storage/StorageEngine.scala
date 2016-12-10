@@ -15,17 +15,19 @@ object StorageEngine {
   private val database = Database.forConfig("storageDatabase", configuration)
 
   def put(key: String, value: String): Future[StoredObject] = {
-    get(key).flatMap {
-      case Some(existingObject) =>
-        val updatedObject = existingObject.copy(value = value)
-        val updateResult = database.run { StoredObjectTable.storedObjects.filter(_.id === existingObject.id).update(updatedObject) }
-        updateResult.flatMap((updateCount) => {
-          if (updateCount > 0) Future.successful(updatedObject)
-          else Future.failed(new StorageException(s"Failed to update key ${key}"))
-        })
-      case None =>
-        val newObject = StoredObject(0, key, value)
-        database.run { StoredObjectTable.returningStoredObjects += newObject }
+    database.run {
+      getKeyQuery(key).flatMap[StoredObject, NoStream, Effect.All]({
+        case Some(existingObject) =>
+          val updatedObject = existingObject.copy(value = value)
+          StoredObjectTable.storedObjects.filter(_.id === existingObject.id).update(updatedObject)
+            .flatMap[StoredObject, NoStream, Effect.All]((updateCount) => {
+              if (updateCount > 0) DBIO.successful(updatedObject)
+              else DBIO.failed(new StorageException(s"Failed to update key $key"))
+            })
+        case None =>
+          val newObject = StoredObject(0, key, value)
+          StoredObjectTable.returningStoredObjects += newObject
+      }).transactionally
     }
   }
 
