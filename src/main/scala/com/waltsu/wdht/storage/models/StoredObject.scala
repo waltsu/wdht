@@ -1,3 +1,3 @@
 package com.waltsu.wdht.storage.models
 
-case class StoredObject(id: Option[Int] = None, key: String, value: String)
+case class StoredObject(id: Int, key: String, value: String)

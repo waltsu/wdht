@@ -23,8 +23,8 @@ libraryDependencies ++= Seq(
   "com.tumblr" %% "colossus" % "0.8.1",
   "com.typesafe.akka" %% "akka-actor" % "2.4.11",
   "com.typesafe.slick" %% "slick" % "3.1.1",
+  "org.postgresql" % "postgresql" % "9.4.1211.jre7",
   "com.typesafe" % "config" % "1.3.1",
-  "org.xerial" % "sqlite-jdbc" % "3.8.11.2",
   "org.flywaydb" % "flyway-core" % "4.0.3",
 
   "org.specs2" %% "specs2-core" % "3.8.5" % "test",

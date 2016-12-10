@@ -11,7 +11,7 @@ object StoredObjectTable {
 
 }
 class StoredObjectTable(tag: Tag) extends Table[StoredObject](tag, "objects") {
-  def id = column[Option[Int]]("id", O.PrimaryKey, O.AutoInc)
+  def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
   def key = column[String]("key")
   def value = column[String]("value")
 

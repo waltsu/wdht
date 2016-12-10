@@ -9,13 +9,14 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 
 @RunWith(classOf[JUnitRunner])
-class StorageEngineSpec(implicit ec: ExecutionContext) extends mutable.Specification {
+class StoreEngineSpec(implicit ec: ExecutionContext) extends mutable.Specification {
+  sequential
   "StorageEngine" should {
     "store new key and value" in new CleanDatabase {
       val tests = for {
         storedObject <- StorageEngine.put("foo", "bar")
       } yield {
-        storedObject.id.get should beGreaterThan(0)
+        storedObject.id should beGreaterThan(0)
         storedObject.key must equalTo("foo")
         storedObject.value must equalTo("bar")
       }
@@ -27,8 +28,8 @@ class StorageEngineSpec(implicit ec: ExecutionContext) extends mutable.Specifica
         insertion <- StorageEngine.put("foo", "bar")
         update <- StorageEngine.put("foo", "bazz")
       } yield {
-        insertion.id.get should beGreaterThan(0)
-        insertion.id.get should equalTo(update.id.get)
+        insertion.id should beGreaterThan(0)
+        insertion.id should equalTo(update.id)
         update.key must equalTo("foo")
         update.value must equalTo("bazz")
       }
