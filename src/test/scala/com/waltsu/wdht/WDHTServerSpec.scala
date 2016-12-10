@@ -2,7 +2,7 @@ package com.waltsu.wdht
 
 import akka.actor.ActorSystem
 import colossus.protocols.http.{HttpBody, HttpCodes, HttpRequest}
-import colossus.testkit.{CallbackAwait, FakeIOSystem, MockConnection}
+import colossus.testkit.{CallbackAwait, CallbackMessage, FakeIOSystem, MockConnection}
 import org.junit.runner.RunWith
 import org.specs2.mutable
 import org.specs2.runner.JUnitRunner
@@ -10,19 +10,26 @@ import org.specs2.runner.JUnitRunner
 import scala.concurrent.duration._
 import DistributedHashTable._
 import Synchronously._
+import colossus.WorkingConnection
+import colossus.service.{Callback, CallbackExecutor}
 import com.waltsu.wdht.storage.models.StoredObject
 import com.waltsu.wdht.testhelpers.CleanDatabase
 import play.api.libs.json.Json
+
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
+import ExecutionContext.Implicits.global
+
 
 @RunWith(classOf[JUnitRunner])
 class WDHTServerSpec extends mutable.Specification {
   sequential
 
   implicit val testAkkaActorSystem = ActorSystem("WDHT-Test")
-  implicit val testExecutor = FakeIOSystem.testExecutor
+  implicit val ioSystem = FakeIOSystem
+  implicit val testExecutor = ioSystem.testExecutor
 
   "WDHTHandler" should {
-    val server = MockConnection.server(new WDHTServer(_)).typedHandler
+    val server = WorkingConnection.server(new WDHTServer(_)).typedHandler
     "fetch key" in new CleanDatabase {
       put("myKey", "Testing").synchronously
 
@@ -36,7 +43,7 @@ class WDHTServerSpec extends mutable.Specification {
 
     "return 404 if key wasn't found" in new CleanDatabase {
       val response = server.handle(HttpRequest.get("/foobar"))
-      val result = CallbackAwait.result(response, 2 seconds)
+      val result = CallbackAwait.result(response, 2.seconds)
       result.code should equalTo(HttpCodes.NOT_FOUND)
     }
 

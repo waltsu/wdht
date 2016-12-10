@@ -14,21 +14,23 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.concurrent.{ExecutionContext, Future}
 
+object WDHTServer {
+  private implicit val executionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
+}
 class WDHTServer(context: ServerContext) extends HttpService(context) {
-  private implicit val executionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(5))
-  private val RequestTimeout = ConfigFactory.load().getInt("wdht.requestTimeout") seconds
+  import WDHTServer._
 
+  private val RequestTimeout = ConfigFactory.load().getInt("wdht.requestTimeout") seconds
 
   def handle = {
     case request @ Get on Root / key =>
-      val response = DistributedHashTable.get(key).map {
+      Callback.fromFuture(DistributedHashTable.get(key)).map {
         case Some(storedObject) =>
           request.ok(Json.toJson(storedObject).toString)
         case None => request.notFound("")
       }
-
-      Callback.successful(Await.result(response, RequestTimeout))
 
     case request @ Put on Root / key =>
       val response = (Json.parse(request.body.toString) \ "value").validate[String] match {
