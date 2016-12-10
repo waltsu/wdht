@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4.1211.jre7",
   "com.typesafe" % "config" % "1.3.1",
   "org.flywaydb" % "flyway-core" % "4.0.3",
+  "com.typesafe.play" % "play-json_2.11" % "2.5.10",
 
   "org.specs2" %% "specs2-core" % "3.8.5" % "test",
   "org.specs2" %% "specs2-mock" % "3.8.5" % "test",
