@@ -11,6 +11,4 @@ trait CleanDatabase extends BeforeAfter {
   def after = {
     StorageEngine.reset()
   }
-
-
 }

@@ -21,9 +21,10 @@ object DistributedHashTable {
 object Synchronously {
   private val OperationTimeout = ConfigFactory.load().getInt("wdht.operationTimeout") seconds
 
-  implicit class OperationWithSynchronously(operation: Future[StoredObject]) {
-    def synchronously(implicit timeout: FiniteDuration = OperationTimeout): StoredObject = {
+  implicit class FutureWithSynchronously[T](operation: Future[T]) {
+    def synchronously(implicit timeout: FiniteDuration = OperationTimeout): T = {
       Await.result(operation, timeout)
     }
   }
+
 }

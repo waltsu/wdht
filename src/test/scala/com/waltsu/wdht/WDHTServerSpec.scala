@@ -1,7 +1,7 @@
 package com.waltsu.wdht
 
 import akka.actor.ActorSystem
-import colossus.protocols.http.{HttpCodes, HttpRequest}
+import colossus.protocols.http.{HttpBody, HttpCodes, HttpRequest}
 import colossus.testkit.{CallbackAwait, FakeIOSystem, MockConnection}
 import org.junit.runner.RunWith
 import org.specs2.mutable
@@ -23,7 +23,7 @@ class WDHTServerSpec extends mutable.Specification {
 
   "WDHTHandler" should {
     val server = MockConnection.server(new WDHTServer(_)).typedHandler
-    "fetch given key" in new CleanDatabase {
+    "fetch key" in new CleanDatabase {
       put("myKey", "Testing").synchronously
 
       val response = server.handle(HttpRequest.get("/myKey"))
@@ -34,10 +34,20 @@ class WDHTServerSpec extends mutable.Specification {
       storedObject.value mustEqual("Testing")
     }
 
-    "response 404 if key wasn't found" in new CleanDatabase {
+    "return 404 if key wasn't found" in new CleanDatabase {
       val response = server.handle(HttpRequest.get("/foobar"))
       val result = CallbackAwait.result(response, 2 seconds)
       result.code should equalTo(HttpCodes.NOT_FOUND)
+    }
+
+    "insert key with value" in new CleanDatabase {
+      val putRequest = HttpRequest.put("/newKey").withBody(HttpBody("""{"value": "newValue" }"""))
+      val response = server.handle(putRequest)
+      val result = CallbackAwait.result(response, 2 seconds)
+      result.code should equalTo(HttpCodes.OK)
+
+      val storedValue = get("newKey").synchronously
+      storedValue.map(_.value) should beSome("newValue")
     }
   }
 }
