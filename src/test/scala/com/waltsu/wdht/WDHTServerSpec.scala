@@ -1,23 +1,19 @@
 package com.waltsu.wdht
 
 import akka.actor.ActorSystem
+import colossus.WorkingConnection
 import colossus.protocols.http.{HttpBody, HttpCodes, HttpRequest}
-import colossus.testkit.{CallbackAwait, CallbackMessage, FakeIOSystem, MockConnection}
+import colossus.testkit.{CallbackAwait, FakeIOSystem}
+import com.waltsu.wdht.DistributedHashTable._
+import com.waltsu.wdht.Synchronously._
+import com.waltsu.wdht.storage.models.StoredObject
+import com.waltsu.wdht.testhelpers.CleanDatabase
 import org.junit.runner.RunWith
 import org.specs2.mutable
 import org.specs2.runner.JUnitRunner
-
-import scala.concurrent.duration._
-import DistributedHashTable._
-import Synchronously._
-import colossus.WorkingConnection
-import colossus.service.{Callback, CallbackExecutor}
-import com.waltsu.wdht.storage.models.StoredObject
-import com.waltsu.wdht.testhelpers.CleanDatabase
 import play.api.libs.json.Json
 
-import scala.concurrent.{Await, ExecutionContext, Future, Promise}
-import ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 
 @RunWith(classOf[JUnitRunner])

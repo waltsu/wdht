@@ -40,9 +40,8 @@ class WDHTServer(context: ServerContext) extends HttpService(context) {
           })
         case error: JsError =>
           Future { request.badRequest("Errors: " + JsError.toJson(error).toString()) }
-
       }
-      Callback.successful(Await.result(response, RequestTimeout))
+      Callback.fromFuture(response)
 
     case request =>
       Callback.successful(request.notFound("not found"))
