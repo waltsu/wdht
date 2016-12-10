@@ -9,7 +9,8 @@ import protocols.http._
 import UrlParsing._
 import HttpMethod._
 import com.typesafe.config.ConfigFactory
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import com.waltsu.wdht.storage.models.StoredObject
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -25,26 +26,28 @@ class WDHTServer(context: ServerContext) extends HttpService(context) {
   private val RequestTimeout = ConfigFactory.load().getInt("wdht.requestTimeout") seconds
 
   def handle = {
-    case request @ Get on Root / key =>
-      Callback.fromFuture(DistributedHashTable.get(key)).map {
-        case Some(storedObject) =>
-          request.ok(Json.toJson(storedObject).toString)
-        case None => request.notFound("")
-      }
+    case request @ Get on Root / key => Callback.fromFuture(getObject(request, key))
+    case request @ Put on Root / key => Callback.fromFuture(putObject(request, key))
+    case request => Callback.successful(request.notFound("not found"))
+  }
 
-    case request @ Put on Root / key =>
-      val response = (Json.parse(request.body.toString) \ "value").validate[String] match {
-        case value: JsSuccess[String] =>
-          DistributedHashTable.put(key, value.value).map((storedObject) => {
-            request.ok(Json.toJson(storedObject).toString())
-          })
-        case error: JsError =>
-          Future { request.badRequest("Errors: " + JsError.toJson(error).toString()) }
-      }
-      Callback.fromFuture(response)
+  private def getObject(request: HttpRequest, key: String): Future[HttpResponse] = {
+    DistributedHashTable.get(key).map {
+      case Some(storedObject) =>
+        request.ok(Json.toJson(storedObject).toString)
+      case None => request.notFound("")
+    }
+  }
 
-    case request =>
-      Callback.successful(request.notFound("not found"))
+  private def putObject(request: HttpRequest, key: String): Future[HttpResponse] = {
+    (Json.parse(request.body.toString) \ "value").validate[String] match {
+      case value: JsSuccess[String] =>
+        DistributedHashTable.put(key, value.value).map((storedObject) => {
+          request.ok(Json.toJson(storedObject).toString())
+        })
+      case error: JsError =>
+        Future { request.badRequest("Errors: " + JsError.toJson(error).toString()) }
+    }
   }
 }
 
